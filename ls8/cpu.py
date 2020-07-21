@@ -7,7 +7,16 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.pc = 0
+        self.reg = [0] * 8
+        self.ram = [0] * 256
+        
+    def ram_read(self, mar):
+        return self.ram[mar]
+    
+    def ram_write(self, mdr, mar):
+        # mdr is the data being written
+        self.ram[mar] = mdr
 
     def load(self):
         """Load a program into memory."""
@@ -59,7 +68,32 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
-
+# 1, 2, 4, 8, 16, 32, 64, 128 etc.
     def run(self):
         """Run the CPU."""
-        pass
+        HLT = 0b00000001
+        LDI = 0b10000010
+        PRN = 0b01000111
+        running = True
+        
+        while running:
+            # need to read the memory address that's store in the register PC
+            # store the result in the ir
+            ir = self.ram_read(self.pc)
+            # sets a specific register to a specified value
+            operand_a = self.ram_read(self.pc +1)
+            operand_b = self.ram_read(self.pc +2)
+            
+            if ir == HLT:
+                running = False
+            elif ir == LDI:
+                self.reg[operand_a] = operand_b
+                self.pc += 3
+            elif ir == PRN:
+                print(self.reg[operand_a])
+                self.pc += 2
+            else: 
+                print(f'Unkown instruction {ir} at address {self.pc}')
+                # stop the program by calling it in the run function
+                running = False
+                sys.exit()
