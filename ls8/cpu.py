@@ -2,6 +2,9 @@
 
 import sys
 
+
+SP = 7
+
 class CPU:
     """Main CPU class."""
 
@@ -11,10 +14,11 @@ class CPU:
         self.reg = [0] * 8
         self.ram = [0] * 256
         self.branch_table = {
-            0b00000001: self.HLT,
             0b10000010: self.LDI,
             0b01000111: self.PRN,
             0b10100010: self.MUL,
+            0b01000101: self.PUSH,
+            0b01000110: self.POP,
         }
         
     def ram_read(self, mar):
@@ -24,22 +28,41 @@ class CPU:
         # mdr is the data being written
         self.ram[mar] = mdr
 
+    def push_value(self, value):
+        self.reg[SP] -= 1
+        self.ram_write(value, self.reg[SP])
+        
+    def pop_value(self):
+        value = self.ram_read(self.reg[SP])
+        self.reg[SP] += 1
+        return value
+    
+    
+    
+    
+    
+    
+    
     def load(self, filename):
     
         """Load a program into memory."""
 
         address = 0
+        
+        
+        
 
         
-        with open(filename) as f:
-            for line in f:
-                line = line.split('#')
-                try:
-                    v = int(line[0], 2)
-                except ValueError:
-                    continue
-                self.ram[address] = v
-                address += 1
+        # with open(filename) as f:
+        #     for line in f:
+                # try:
+                #     v = int(line[0], 2)
+                # except ValueError:
+                #     continue
+                # self.ram[address] = v
+                # address += 1
+                
+                # line = line.split('#',  1)[0]
                 
         # For now, we've just hardcoded a program:
 
@@ -101,6 +124,14 @@ class CPU:
     def MUL(self, operand_a, operand_b):
         self.reg[operand_a] *= self.reg[operand_b]
         self.pc += 3
+        
+    def PUSH(self, operand_a, operand_b):
+        self.push_value(self.reg[operand_a])
+        self.pc += 2
+        
+    def POP(self, operand_a, operand_b):
+        self.reg[operand_a] = self.pop_value()
+        self.pc += 2
         
     
 # 1, 2, 4, 8, 16, 32, 64, 128 etc.
